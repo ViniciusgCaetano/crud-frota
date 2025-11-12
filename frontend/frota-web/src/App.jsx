@@ -38,30 +38,34 @@ function App() {
   // ============================
   // LOGIN
   // ============================
-async function handleLogin(email, senha) {
-  setGlobalError("");
-  try {
-    const resp = await fetch(`${API_BASE}/auth/login`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "x-api-key": API_KEY,
-      },
-      body: JSON.stringify({ email, senha }),
-    });
-    const data = await resp.json();
-    if (!resp.ok) {
-      throw new Error(data.erro || "Falha no login");
-    }
+  async function handleLogin(email, senha) {
+    setGlobalError("");
+    try {
+      const resp = await fetch(`${API_BASE}/auth/login`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-api-key": API_KEY,
+        },
+        body: JSON.stringify({ email, senha }),
+      });
+      const data = await resp.json();
+      if (!resp.ok) {
+        throw new Error(data.erro || "Falha no login");
+      }
 
-    setToken(data.token);
-    setCurrentUser(data.usuario);
-    localStorage.setItem("token", data.token);
-    localStorage.setItem("user", JSON.stringify(data.usuario));
-  } catch (err) {
-    setGlobalError(err.message);
+      setToken(data.token);
+      setCurrentUser(data.usuario);
+
+      localStorage.setItem("token", data.token);
+      localStorage.setItem("user", JSON.stringify(data.usuario));
+
+
+      refreshSharedLists(data.token);
+    } catch (err) {
+      setGlobalError(err.message);
+    }
   }
-}
 
 // opcional: seed admin
 async function handleSeedAdmin() {
@@ -103,8 +107,44 @@ async function handleSeedAdmin() {
   }
 
   useEffect(() => {
-    refreshSharedLists();
-  }, [token]);
+    const savedToken = localStorage.getItem("token");
+    const savedUser = localStorage.getItem("user");
+
+    if (savedToken) {
+      setToken(savedToken);
+    }
+    if (savedUser) {
+      setCurrentUser(JSON.parse(savedUser));
+    }
+
+    if (savedToken) {
+      (async () => {
+        try {
+          const resp = await fetch(`${API_BASE}/auth/validar`, {
+            headers: {
+              Authorization: `Bearer ${savedToken}`,
+              "x-api-key": API_KEY,
+            },
+          });
+          if (resp.ok) {
+            const data = await resp.json();
+            setCurrentUser(data.usuario);
+            localStorage.setItem("user", JSON.stringify(data.usuario));
+
+            refreshSharedLists(savedToken);
+          } else {
+
+            localStorage.removeItem("token");
+            localStorage.removeItem("user");
+            setToken("");
+            setCurrentUser(null);
+          }
+        } catch (e) {
+          console.warn("Falha ao validar sessão:", e);
+        }
+      })();
+    }
+  }, []);
 
 
 function LoginScreen({

@@ -16,7 +16,7 @@ import {
 const router = Router();
 
 // todo relatório é coisa de gestão
-const PERFIS_GESTAO = ['admin', 'gestor_frota'];
+const PERFIS_GESTAO = ['solicitante', 'supervisor', 'admin', 'gestor_frota'];
 
 // 1. cards do topo (front esperava algo como /resumo)
 router.get(
