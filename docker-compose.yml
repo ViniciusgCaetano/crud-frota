@@ -1,0 +1,53 @@
+version: "3.9"
+
+services:
+  mongo:
+    image: mongo:7
+    container_name: mongo-frota
+    restart: always
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+
+  api:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: api-frota
+    restart: always
+    depends_on:
+      - mongo
+    environment:
+      # tua API hoje lê process.env.MONGODB_URI
+      MONGODB_URI: "mongodb://mongo:27017/frotaVeiculos"
+      PORT: 3000
+      NODE_ENV: production
+      JWT_SECRET: "stroque_por_um_segredo_forte"
+      API_KEY: "dev-key-local"
+      # teu server.js usa ALLOWED_ORIGINS com indexOf
+      # então vou passar só o front do container
+      ALLOWED_ORIGINS: "http://localhost:5173,http://frontend:5173"
+    ports:
+      - "3000:3000"
+    # se tiver .env no backend e quiser usar, descomenta
+    # env_file:
+    #   - ./backend/.env
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: frontend-frota
+    restart: always
+    depends_on:
+      - api
+    ports:
+      - "5173:5173"
+    environment:
+      # isso aqui é só pra você, se o front ler de import.meta.env
+      VITE_API_BASE: "http://localhost:3000/api/v1"
+      VITE_API_KEY: "dev-key-local"
+
+volumes:
+  mongo_data:
