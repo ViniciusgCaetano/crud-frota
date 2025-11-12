@@ -161,9 +161,10 @@ O front vai ficar em: **[http://localhost:5173](http://localhost:5173)**
 O projeto foi desenvolvido iterativamente com o apoio de IA, pedindo alteração e sugestões de melhoria para models Mongoose, controllers REST, telas React com dropdowns, adaptação de login, rotas de relatório agregadas e arquivos de Docker.
 
 
-1. **“Monte o backend para o estudo de caso de frota”**
+1. **“Monte um arquivo de requisitos para o estudo de caso de frota”**
 
-   * Pediu controllers, rotas e models para: usuários, veículos, reservas, devoluções, eventos, benefícios, relatórios.
+   * Isso auxiliou o grupo a entender o que era necessário e montar a EAP para a construção do trabalho
+   
 2. **“Substitua campos de ID por dropdown no front”**
 
    * Ajustou o React para buscar listas e preencher `<select>`.
